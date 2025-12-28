@@ -7,11 +7,11 @@ SIM ?= ghdl
 VHDL_SOURCES = $(PWD)/../src/image_aggregator_pkg.vhd \
                $(PWD)/../src/image_aggregator_top.vhd
 
-# Toplevel module
-COCOTB_TOPLEVEL = image_aggregator_top
-
 # Python test module
 COCOTB_TEST_MODULES = test_image_aggregator
+
+# Toplevel module
+COCOTB_TOPLEVEL = image_aggregator_top
 
 # GHDL specific arguments
 EXTRA_ARGS += --ieee=synopsys --std=08

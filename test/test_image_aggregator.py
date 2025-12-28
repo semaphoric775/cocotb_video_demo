@@ -23,52 +23,52 @@ class ImageAggregatorTB:
         self.dut = dut
 
         # Create clock
-        cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
+        cocotb.start_soon(Clock(dut.clk_i, 10, unit="ns").start())
 
         # Create AXI Stream sources for 4 inputs
         self.source0 = AxiStreamSource(
-            AxiStreamBus.from_prefix(dut, "s0_axis"),
-            dut.clk,
-            dut.rst_n,
+            AxiStreamBus.from_prefix(dut, "s0_axis_i"),
+            dut.clk_i,
+            dut.rstn_i,
             reset_active_level=False,
         )
 
         self.source1 = AxiStreamSource(
-            AxiStreamBus.from_prefix(dut, "s1_axis"),
-            dut.clk,
-            dut.rst_n,
+            AxiStreamBus.from_prefix(dut, "s1_axis_i"),
+            dut.clk_i,
+            dut.rstn_i,
             reset_active_level=False,
         )
 
         self.source2 = AxiStreamSource(
-            AxiStreamBus.from_prefix(dut, "s2_axis"),
-            dut.clk,
-            dut.rst_n,
+            AxiStreamBus.from_prefix(dut, "s2_axis_i"),
+            dut.clk_i,
+            dut.rstn_i,
             reset_active_level=False,
         )
 
         self.source3 = AxiStreamSource(
-            AxiStreamBus.from_prefix(dut, "s3_axis"),
-            dut.clk,
-            dut.rst_n,
+            AxiStreamBus.from_prefix(dut, "s3_axis_i"),
+            dut.clk_i,
+            dut.rstn_i,
             reset_active_level=False,
         )
 
         # Create AXI Stream sink for output
         self.sink = AxiStreamSink(
-            AxiStreamBus.from_prefix(dut, "m_axis"),
-            dut.clk,
-            dut.rst_n,
+            AxiStreamBus.from_prefix(dut, "m_axis_o"),
+            dut.clk_i,
+            dut.rstn_i,
             reset_active_level=False,
         )
 
     async def reset(self):
         """Reset the DUT"""
-        self.dut.rst_n.value = 0
+        self.dut.rstn_i.value = 0
         await Timer(100, unit="ns")
-        await RisingEdge(self.dut.clk)
-        self.dut.rst_n.value = 1
-        await RisingEdge(self.dut.clk)
+        await RisingEdge(self.dut.clk_i)
+        self.dut.rstn_i.value = 1
+        await RisingEdge(self.dut.clk_i)
         self.dut._log.info("Reset complete")
 
     def generate_test_image(self, width, height, pattern="counter"):
@@ -119,11 +119,11 @@ async def test_reset(dut):
     await tb.reset()
 
     # Check that all ready signals are low after reset
-    await RisingEdge(dut.clk)
-    assert dut.s0_tready.value == 0, "s0_tready should be low after reset"
-    assert dut.s1_tready.value == 0, "s1_tready should be low after reset"
-    assert dut.s2_tready.value == 0, "s2_tready should be low after reset"
-    assert dut.s3_tready.value == 0, "s3_tready should be low after reset"
+    await RisingEdge(dut.clk_i)
+    assert dut.s0_tready_o.value == 0, "s0_tready should be low after reset"
+    assert dut.s1_tready_o.value == 0, "s1_tready should be low after reset"
+    assert dut.s2_tready_o.value == 0, "s2_tready should be low after reset"
+    assert dut.s3_tready_o.value == 0, "s3_tready should be low after reset"
 
     dut._log.info("Reset test passed")
 
@@ -193,7 +193,7 @@ async def test_state_machine(dut):
 
     # Wait a few cycles and observe state transitions
     for i in range(20):
-        await RisingEdge(dut.clk)
+        await RisingEdge(dut.clk_i)
         # State machine should be in S_WAIT_SOF initially
         dut._log.info(
             f"Cycle {i}: ready signals = {dut.s0_tready.value}, "
